@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(Remove-Item *)",
+      "PowerShell(Remove-Item *)",
+      "WebFetch(domain:data.buienradar.nl)",
+      "PowerShell($ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri \"https://data.buienradar.nl/2.0/feed/json\" -OutFile \"C:\\\\Users\\\\woute\\\\Echo\\\\buienradar.json\" -TimeoutSec 30)"
+    ]
+  }
+}

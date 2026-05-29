@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Dark theme (default) ───────────────────────────────── */
+:root {
+  --bg: #070a0f;
+  --bg-card: rgba(255, 255, 255, 0.035);
+  --bg-card-hover: rgba(255, 255, 255, 0.055);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-bright: rgba(255, 255, 255, 0.12);
+  --text: #e8eaf0;
+  --text-dim: rgba(232, 234, 240, 0.45);
+  --text-muted: rgba(232, 234, 240, 0.25);
+  --accent: #4f9cf9;
+  --accent-glow: rgba(79, 156, 249, 0.15);
+  --accent-dim: rgba(79, 156, 249, 0.6);
+  --green: #3dd68c;
+  --green-dim: rgba(61, 214, 140, 0.15);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245, 158, 11, 0.15);
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.15);
+
+  --cloud: #4B5C7A;
+  --font: 'Inter', system-ui, sans-serif;
+  --radius: 16px;
+  --radius-sm: 10px;
+
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Light theme ────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg: #eef1f7;
+  --bg-card: rgba(255, 255, 255, 0.72);
+  --bg-card-hover: rgba(255, 255, 255, 0.92);
+  --border: rgba(0, 0, 0, 0.07);
+  --border-bright: rgba(0, 0, 0, 0.13);
+  --text: #0f1117;
+  --text-dim: rgba(15, 17, 23, 0.55);
+  --text-muted: rgba(15, 17, 23, 0.32);
+  --accent: #2563eb;
+  --accent-glow: rgba(37, 99, 235, 0.1);
+  --accent-dim: rgba(37, 99, 235, 0.65);
+  --green: #059669;
+  --green-dim: rgba(5, 150, 105, 0.1);
+  --amber: #d97706;
+  --amber-dim: rgba(217, 119, 6, 0.1);
+  --red: #dc2626;
+  --red-dim: rgba(220, 38, 38, 0.1);
+  --cloud: #9BAEC8;
+}
+
+/* Noise texture: much quieter in light mode */
+[data-theme="light"] body::before {
+  opacity: 0.07;
+}
+
+/* Ambient glow: adjust hue for light mode accent */
+[data-theme="light"] body::after {
+  background: radial-gradient(ellipse, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+}
+
+/* Cards: soft shadow instead of transparent glass */
+[data-theme="light"] .card {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05), 0 6px 28px rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .card::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.03), transparent);
+}
+
+[data-theme="light"] .card-tag {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Sidebar: frosted white */
+[data-theme="light"] .sidebar {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="light"] .nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-dim);
+}
+
+[data-theme="light"] .nav-indicator {
+  background: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.22);
+}
+
+[data-theme="light"] .theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .lang-switcher {
+  border-color: var(--border);
+}
+
+[data-theme="light"] .lang-seg--active {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+}
+
+[data-theme="light"] .lang-seg:hover:not(.lang-seg--active) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* Terminal: light frosted look */
+[data-theme="light"] .echo-terminal {
+  background: rgba(245, 248, 255, 0.82);
+  border-color: rgba(37, 99, 235, 0.13);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05), 0 6px 28px rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .echo-terminal::before {
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.05), transparent);
+}
+
+[data-theme="light"] .terminal-send {
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+[data-theme="light"] .terminal-send:hover:not(:disabled) {
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.15);
+}
+
+[data-theme="light"] .weather-report-title {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* ── Global reset ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Smooth theme transition on key surfaces */
+html,
+body,
+.card,
+.sidebar,
+.main,
+.echo-terminal,
+.nav-item,
+.theme-toggle,
+.lang-seg {
+  transition: background-color 0.3s ease, color 0.25s ease,
+              border-color 0.25s ease, box-shadow 0.3s ease;
+}
+
+body {
+  overflow: hidden;
+  height: 100svh;
+  width: 100vw;
+}
+
+#root {
+  height: 100svh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Scrollable inner areas */
+.scrollable {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.scrollable::-webkit-scrollbar { width: 4px; }
+.scrollable::-webkit-scrollbar-track { background: transparent; }
+.scrollable::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* Ambient glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 30%;
+  width: 40vw;
+  height: 60vh;
+  background: radial-gradient(ellipse, rgba(79, 156, 249, 0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
