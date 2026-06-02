@@ -7,6 +7,10 @@ import {
   setFocusMode,
   setEveningMode,
 } from '../services/hueService'
+import {
+  getStoredToken,
+  fetchTodayEvents,
+} from '../services/calendarService'
 
 interface Message {
   id: number
@@ -15,11 +19,63 @@ interface Message {
   timestamp: string
 }
 
+// ── Async action type ─────────────────────────────────────────
+
+type AsyncAction = () => Promise<string>
+
+// ── Calendar command matching ─────────────────────────────────
+
+function matchCalendarCommand(input: string): AsyncAction | null {
+  const t = input.toLowerCase().trim()
+
+  const isCalQuery =
+    /what\s+(is|are|'?s)\s+(my|on\s+(my|the))\s+(day|calendar|schedule|agenda)/.test(t) ||
+    /what does my (day|schedule) look like/.test(t) ||
+    /what is on my calendar/.test(t) ||
+    /wat staat er vandaag op de planning/.test(t) ||
+    /heb ik afspraken vandaag/.test(t) ||
+    /agenda vandaag/.test(t)
+
+  if (!isCalQuery) return null
+
+  return async () => {
+    const token = getStoredToken()
+
+    if (!token) {
+      return 'Your Google Calendar is not connected. Use the Calendar card on the dashboard to sign in.'
+    }
+
+    const events = await fetchTodayEvents(token)
+
+    if (events.length === 0) {
+      return 'Your calendar is clear today — no events scheduled.'
+    }
+
+    const timed  = events.filter(e => !e.allDay)
+    const allDay = events.filter(e => e.allDay)
+
+    const parts: string[] = []
+
+    if (timed.length > 0) {
+      const list = timed.map(e => `${e.start} ${e.title}`).join(', ')
+      parts.push(
+        `You have ${timed.length} event${timed.length > 1 ? 's' : ''} today: ${list}.`,
+      )
+    }
+
+    if (allDay.length > 0) {
+      parts.push(
+        `All-day: ${allDay.map(e => e.title).join(', ')}.`,
+      )
+    }
+
+    return parts.join(' ')
+  }
+}
+
 // ── Hue command matching ──────────────────────────────────────
 
-type HueAction = () => Promise<string>
-
-function matchHueCommand(input: string): HueAction | null {
+function matchHueCommand(input: string): AsyncAction | null {
   const t = input.toLowerCase().trim()
 
   if (/lights?\s+off|turn\s+(the\s+)?lights?\s+off/.test(t))
@@ -42,10 +98,6 @@ function matchHueCommand(input: string): HueAction | null {
 // ── Mock fallback responses ───────────────────────────────────
 
 const MOCK_RESPONSES: Array<{ keywords: string[]; response: string }> = [
-  {
-    keywords: ['day', 'looking', 'schedule'],
-    response: 'Your morning looks calm. You have two planned moments and enough time for focused work.',
-  },
   {
     keywords: ['summarize', 'summary', 'morning', 'recap'],
     response: 'Today starts with a clear schedule. Your first important moment is at 10:30.',
@@ -73,7 +125,7 @@ function getMockResponse(input: string): string {
   for (const entry of MOCK_RESPONSES) {
     if (entry.keywords.some(k => lower.includes(k))) return entry.response
   }
-  return 'Echo is learning from your patterns. No direct match found — try asking about your day, focus mode, or routine.'
+  return "Echo is learning from your patterns. Try asking about your calendar, lights, weather, or daily routine."
 }
 
 function getTimestamp() {
@@ -90,7 +142,7 @@ export default function EchoTerminal({ lang }: Props) {
   const [messages, setMessages] = useState<Message[]>(() => [
     { id: 0, role: 'echo', text: translations[lang].echoReady, timestamp: getTimestamp() },
   ])
-  const [input, setInput]       = useState('')
+  const [input, setInput]           = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const nextId    = useRef(1)
@@ -114,10 +166,19 @@ export default function EchoTerminal({ lang }: Props) {
     setIsThinking(true)
 
     let responseText: string
-    const hueAction = matchHueCommand(trimmed)
 
-    if (hueAction) {
-      // Real Hue call + minimum 600 ms thinking feel
+    // Priority: calendar → hue → mock
+    const calAction = matchCalendarCommand(trimmed)
+    const hueAction = !calAction ? matchHueCommand(trimmed) : null
+
+    if (calAction) {
+      const [text] = await Promise.all([
+        calAction().catch(() =>
+          'Could not reach Google Calendar. Check your connection and try again.'),
+        new Promise<void>(r => setTimeout(r, 700)),
+      ])
+      responseText = text
+    } else if (hueAction) {
       const [text] = await Promise.all([
         hueAction().catch(() =>
           'Could not reach the Hue Bridge. Make sure you are on the local network.'),

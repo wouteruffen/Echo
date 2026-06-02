@@ -3,6 +3,7 @@ import Clock, { ClockGreeting } from './components/Clock'
 import WeatherCard from './components/WeatherCard'
 import EchoTerminal from './components/EchoTerminal'
 import HueControl from './components/HueControl'
+import CalendarOverview from './components/CalendarOverview'
 import { useTheme } from './hooks/useTheme'
 import { useLanguage } from './hooks/useLanguage'
 import './App.css'
@@ -27,6 +28,7 @@ export default function App() {
 
         <div className="dashboard-content">
           <WeatherCard lang={lang} />
+          <CalendarOverview />
           <div className="dashboard-bottom">
             <EchoTerminal lang={lang} />
             <HueControl />
