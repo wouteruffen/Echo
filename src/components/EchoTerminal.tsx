@@ -1,16 +1,25 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { translations, type Lang } from '../i18n/translations'
+import { useSpeech } from '../hooks/useSpeech'
+import EchoWaveform from './EchoWaveform'
 import {
   turnAllLightsOn,
   turnAllLightsOff,
   setFocusMode,
   setEveningMode,
+  getLights,
 } from '../services/hueService'
 import {
   getStoredToken,
   fetchTodayEvents,
 } from '../services/calendarService'
+import {
+  fetchWeatherData,
+  FALLBACK_WEATHER,
+  type DayWeather,
+} from '../services/buienradarService'
+import { generateEchoInsight } from '../utils/echoInsight'
 
 interface Message {
   id: number
@@ -147,6 +156,13 @@ export default function EchoTerminal({ lang }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const nextId    = useRef(1)
 
+  const {
+    enabled: voiceEnabled, isSpeaking, supported: voiceSupported,
+    voices, selectedVoiceName, setSelectedVoice,
+    speakEchoResponse, testVoice, toggle: toggleVoice,
+    wordBoundaryCount, currentWordLength,
+  } = useSpeech(lang)
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isThinking])
@@ -198,6 +214,51 @@ export default function EchoTerminal({ lang }: Props) {
     }
     setMessages(prev => [...prev, echoMsg])
     setIsThinking(false)
+    speakEchoResponse(responseText)
+  }
+
+  const handleInsight = async () => {
+    if (isThinking) return
+    setIsThinking(true)
+
+    const [weatherResult, lightsResult] = await Promise.allSettled([
+      fetchWeatherData(),
+      getLights(),
+    ])
+
+    const weather: DayWeather | null =
+      weatherResult.status === 'fulfilled'
+        ? (weatherResult.value.days[0] ?? null)
+        : FALLBACK_WEATHER.days[0]
+
+    const lightsOn: boolean | null =
+      lightsResult.status === 'fulfilled'
+        ? lightsResult.value.some(l => l.state.on)
+        : null
+
+    let events = [] as Awaited<ReturnType<typeof fetchTodayEvents>>
+    const token = getStoredToken()
+    if (token) {
+      try { events = await fetchTodayEvents(token) } catch { /* no calendar */ }
+    }
+
+    const insight = generateEchoInsight({
+      hour: new Date().getHours(),
+      weather,
+      events,
+      lightsOn,
+      lang,
+    })
+
+    const echoMsg: Message = {
+      id: nextId.current++,
+      role: 'echo',
+      text: insight,
+      timestamp: getTimestamp(),
+    }
+    setMessages(prev => [...prev, echoMsg])
+    setIsThinking(false)
+    speakEchoResponse(insight)
   }
 
   return (
@@ -209,8 +270,63 @@ export default function EchoTerminal({ lang }: Props) {
     >
       <div className="card-header">
         <span className="card-label">{tr.echoTerminal}</span>
-        <span className="ai-pulse"><span className="ai-dot" />{tr.ready}</span>
+        <div className="echo-header-right">
+          <button
+            className="insight-btn"
+            onClick={handleInsight}
+            disabled={isThinking}
+            title="Generate an Echo insight from your dashboard data"
+          >
+            BRIEF
+          </button>
+          <button
+            className={`voice-toggle${voiceEnabled ? ' voice-toggle--active' : ''}`}
+            onClick={toggleVoice}
+            title={voiceEnabled ? 'Voice on — click to disable' : 'Voice off — click to enable'}
+          >
+            VOX
+          </button>
+          {isSpeaking ? (
+            <span className="ai-pulse">
+              <span className="speaking-wave">
+                <span /><span /><span /><span /><span />
+              </span>
+              Speaking
+            </span>
+          ) : (
+            <span className="ai-pulse"><span className="ai-dot" />{tr.ready}</span>
+          )}
+        </div>
       </div>
+
+      <div className="voice-settings-row">
+        <select
+          className="voice-select"
+          value={selectedVoiceName ?? ''}
+          onChange={e => setSelectedVoice(e.target.value || null)}
+          disabled={voices.length === 0}
+        >
+          <option value="">{voices.length === 0 ? 'Loading voices…' : 'Auto (fallback)'}</option>
+          {voices.map(v => (
+            <option key={v.name} value={v.name}>
+              {v.name} ({v.lang})
+            </option>
+          ))}
+        </select>
+        <button
+          className="voice-test-btn"
+          onClick={() => testVoice('Hallo, ik ben ECHO. Dit is een test van de geselecteerde stem.')}
+          disabled={!voiceSupported}
+        >
+          Test
+        </button>
+      </div>
+
+      <EchoWaveform
+        isSpeaking={isSpeaking}
+        wordBoundaryCount={wordBoundaryCount}
+        currentWordLength={currentWordLength}
+      />
 
       <div className="terminal-output">
         <AnimatePresence initial={false}>

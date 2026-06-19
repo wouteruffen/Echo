@@ -778,6 +778,202 @@
   cursor: not-allowed;
 }
 
+/* ── Voice settings row ─────────────────────────────────── */
+.voice-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.voice-select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: var(--font);
+  padding: 5px 8px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.voice-select:hover,
+.voice-select:focus {
+  border-color: var(--border-bright);
+  color: var(--text);
+}
+
+.voice-select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.voice-select option {
+  background: #0d1117;
+  color: var(--text);
+}
+
+.voice-test-btn {
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.voice-test-btn:hover:not(:disabled) {
+  background: rgba(79, 156, 249, 0.08);
+  border-color: rgba(79, 156, 249, 0.3);
+  color: var(--accent);
+}
+
+.voice-test-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Echo Terminal header right group ───────────────────── */
+.echo-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Voice toggle ───────────────────────────────────────── */
+.voice-toggle {
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.voice-toggle:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-bright);
+  color: var(--text-dim);
+}
+
+.voice-toggle--active {
+  background: var(--accent-glow);
+  border-color: rgba(79, 156, 249, 0.25);
+  color: var(--accent);
+}
+
+.voice-toggle--active:hover {
+  background: rgba(79, 156, 249, 0.2);
+  border-color: rgba(79, 156, 249, 0.5);
+  color: var(--text);
+}
+
+/* ── Speaking wave indicator ────────────────────────────── */
+.speaking-wave {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 12px;
+}
+
+.speaking-wave span {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  animation: wave-bar 0.9s ease-in-out infinite;
+}
+
+.speaking-wave span:nth-child(1) { height: 4px;  animation-delay: 0s;    }
+.speaking-wave span:nth-child(2) { height: 8px;  animation-delay: 0.15s; }
+.speaking-wave span:nth-child(3) { height: 11px; animation-delay: 0.3s;  }
+.speaking-wave span:nth-child(4) { height: 8px;  animation-delay: 0.15s; }
+.speaking-wave span:nth-child(5) { height: 4px;  animation-delay: 0s;    }
+
+@keyframes wave-bar {
+  0%, 100% { opacity: 0.5; transform: scaleY(0.5); }
+  50%       { opacity: 1;   transform: scaleY(1);   }
+}
+
+/* ── Echo waveform ───────────────────────────────────────── */
+.echo-waveform {
+  width: 100%;
+  margin: 10px 0 14px;
+}
+
+.echo-waveform svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(79, 156, 249, 0.22));
+  transition: filter 0.7s ease;
+}
+
+.echo-waveform--active svg {
+  filter: drop-shadow(0 0 10px rgba(79, 156, 249, 0.55));
+}
+
+/* Wave layers — stroke color inherits the accent token so light/dark
+   theme changes are handled automatically. Opacity differs per layer. */
+.ewf-layer {
+  stroke: var(--accent);
+  fill: none;
+  transition: opacity 0.5s ease;
+}
+
+.ewf-layer--bg  { opacity: 0.10; }
+.ewf-layer--mid { opacity: 0.33; }
+.ewf-layer--fg  { opacity: 0.82; }
+
+.echo-waveform--active .ewf-layer--bg  { opacity: 0.17; }
+.echo-waveform--active .ewf-layer--mid { opacity: 0.50; }
+.echo-waveform--active .ewf-layer--fg  { opacity: 0.95; }
+
+/* ── Insight (BRIEF) button ─────────────────────────────── */
+.insight-btn {
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--green-dim);
+  border: 1px solid rgba(61, 214, 140, 0.22);
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.insight-btn:hover:not(:disabled) {
+  background: rgba(61, 214, 140, 0.22);
+  border-color: rgba(61, 214, 140, 0.45);
+  color: var(--text);
+}
+
+.insight-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 /* ── Google Calendar ─────────────────────────────────────── */
 .cal-connect-wrap {
   display: flex;
