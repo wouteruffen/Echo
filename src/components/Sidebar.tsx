@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useNavigate, useLocation } from 'react-router-dom'
 import type { Theme } from '../hooks/useTheme'
 import { translations, type Lang } from '../i18n/translations'
 
@@ -12,6 +13,11 @@ interface SidebarProps {
 export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: SidebarProps) {
   const isDark = theme === 'dark'
   const tr = translations[lang]
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const isHome = location.pathname === '/'
+  const isVoicePlayground = location.pathname === '/voice-playground'
 
   return (
     <motion.nav
@@ -52,14 +58,36 @@ export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: Sideb
       </button>
 
       <div className="sidebar-nav">
-        <button className="nav-item active" title={tr.home}>
+        <button
+          className={`nav-item ${isHome ? 'active' : ''}`}
+          title={tr.home}
+          onClick={() => navigate('/')}
+        >
           <span className="nav-icon">⬡</span>
           <span className="nav-label">{tr.home}</span>
-          <motion.span
-            className="nav-indicator"
-            layoutId="nav-indicator"
-            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-          />
+          {isHome && (
+            <motion.span
+              className="nav-indicator"
+              layoutId="nav-indicator"
+              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            />
+          )}
+        </button>
+
+        <button
+          className={`nav-item ${isVoicePlayground ? 'active' : ''}`}
+          title="Voice Playground"
+          onClick={() => navigate('/voice-playground')}
+        >
+          <span className="nav-icon">◎</span>
+          <span className="nav-label">Voice</span>
+          {isVoicePlayground && (
+            <motion.span
+              className="nav-indicator"
+              layoutId="nav-indicator"
+              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            />
+          )}
         </button>
       </div>
 

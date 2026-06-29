@@ -1,9 +1,11 @@
+import { Routes, Route } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import Clock, { ClockGreeting } from './components/Clock'
 import WeatherCard from './components/WeatherCard'
 import EchoTerminal from './components/EchoTerminal'
 import HueControl from './components/HueControl'
 import CalendarOverview from './components/CalendarOverview'
+import VoicePlaygroundPage from './pages/VoicePlaygroundPage'
 import { useTheme } from './hooks/useTheme'
 import { useLanguage } from './hooks/useLanguage'
 import './App.css'
@@ -21,19 +23,25 @@ export default function App() {
         onSetLang={setLang}
       />
       <main className="main scrollable">
-        <header className="dashboard-header">
-          <ClockGreeting lang={lang} />
-          <Clock lang={lang} />
-        </header>
-
-        <div className="dashboard-content">
-          <WeatherCard lang={lang} />
-          <CalendarOverview />
-          <div className="dashboard-bottom">
-            <EchoTerminal lang={lang} />
-            <HueControl />
-          </div>
-        </div>
+        <Routes>
+          <Route path="/" element={
+            <>
+              <header className="dashboard-header">
+                <ClockGreeting lang={lang} />
+                <Clock lang={lang} />
+              </header>
+              <div className="dashboard-content">
+                <WeatherCard lang={lang} />
+                <CalendarOverview />
+                <div className="dashboard-bottom">
+                  <EchoTerminal lang={lang} />
+                  <HueControl />
+                </div>
+              </div>
+            </>
+          } />
+          <Route path="/voice-playground" element={<VoicePlaygroundPage />} />
+        </Routes>
       </main>
     </div>
   )
