@@ -15,7 +15,7 @@ export default function VoicePlaygroundPage() {
       <div className="vp-page-header">
         <div>
           <h1 className="vp-title">Voice Playground</h1>
-          <p className="vp-subtitle">Test ECHO's voice output.</p>
+          <p className="vp-subtitle">Test voice input, output, and experience ECHO's storyboard demo.</p>
         </div>
         <button
           className="vp-back-btn"

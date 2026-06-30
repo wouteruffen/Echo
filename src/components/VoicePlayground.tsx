@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import StoryboardDemo from './StoryboardDemo'
 
 type TtsStatus = 'idle' | 'speaking' | 'finished'
 type SttLang = 'en-US' | 'nl-NL'
 
-// webkitSpeechRecognition is not in the standard DOM types
 declare global {
   interface Window {
     webkitSpeechRecognition?: typeof SpeechRecognition
@@ -15,8 +16,17 @@ function getSpeechRecognitionCtor(): typeof SpeechRecognition | undefined {
   return window.SpeechRecognition ?? window.webkitSpeechRecognition
 }
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' },
+  }),
+}
+
 export default function VoicePlayground() {
-  // ── TTS state ─────────────────────────────────────────────
+  // ── TTS state ──────────────────────────────────────────────
   const [text, setText] = useState('')
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [selectedVoice, setSelectedVoice] = useState('')
@@ -24,18 +34,21 @@ export default function VoicePlayground() {
   const [ttsStatus, setTtsStatus] = useState<TtsStatus>('idle')
   const [ttsError, setTtsError] = useState('')
 
-  // ── STT state ─────────────────────────────────────────────
+  // ── STT state ──────────────────────────────────────────────
   const [isListening, setIsListening] = useState(false)
   const [sttLang, setSttLang] = useState<SttLang>('en-US')
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
-  const textBeforeRef = useRef('')      // textarea content when session started
-  const finalTranscriptRef = useRef('') // finalized words this session
+  const recognitionRef    = useRef<SpeechRecognition | null>(null)
+  const textBeforeRef     = useRef('')
+  const finalTranscriptRef = useRef('')
 
-  // ── Capabilities ──────────────────────────────────────────
+  // Storyboard stop callback — StoryboardDemo writes its cancel function here
+  // so Voice Output can interrupt the storyboard before starting its own speech.
+  const sbStopRef = useRef<() => void>(() => {})
+
+  // ── Capabilities ───────────────────────────────────────────
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
   const sttSupported = !!getSpeechRecognitionCtor()
 
-  // Load TTS voices
   useEffect(() => {
     if (!ttsSupported) return
     const load = () => {
@@ -53,18 +66,15 @@ export default function VoicePlayground() {
     }
   }, [ttsSupported])
 
-  // Stop recognition on unmount
   useEffect(() => {
     return () => { recognitionRef.current?.stop() }
   }, [])
 
-  // ── TTS ───────────────────────────────────────────────────
+  // ── Voice Output: speak custom text ───────────────────────
   function speak() {
-    if (!text.trim()) {
-      setTtsError('Enter a message first.')
-      return
-    }
+    if (!text.trim()) { setTtsError('Enter a message first.'); return }
     setTtsError('')
+    sbStopRef.current()          // cancel storyboard if running
     window.speechSynthesis.cancel()
 
     const utterance = new SpeechSynthesisUtterance(text)
@@ -73,24 +83,23 @@ export default function VoicePlayground() {
     utterance.rate = rate
 
     utterance.onstart = () => setTtsStatus('speaking')
-    utterance.onend = () => setTtsStatus('finished')
+    utterance.onend   = () => setTtsStatus('finished')
     utterance.onerror = () => setTtsStatus('idle')
-
     setTtsStatus('speaking')
     window.speechSynthesis.speak(utterance)
   }
 
-  // ── STT ───────────────────────────────────────────────────
+  // ── STT helpers ────────────────────────────────────────────
   function startListening() {
     const Ctor = getSpeechRecognitionCtor()
     if (!Ctor) return
 
     const recognition = new Ctor()
-    recognition.continuous = true
+    recognition.continuous     = true
     recognition.interimResults = true
-    recognition.lang = sttLang
+    recognition.lang           = sttLang
 
-    textBeforeRef.current = text.trim()
+    textBeforeRef.current      = text.trim()
     finalTranscriptRef.current = ''
 
     recognition.onstart = () => setIsListening(true)
@@ -98,26 +107,21 @@ export default function VoicePlayground() {
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let sessionFinal = finalTranscriptRef.current
       let interim = ''
-
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
+        const t = event.results[i][0].transcript
         if (event.results[i].isFinal) {
-          sessionFinal += (sessionFinal ? ' ' : '') + transcript.trim()
+          sessionFinal += (sessionFinal ? ' ' : '') + t.trim()
           finalTranscriptRef.current = sessionFinal
         } else {
-          interim = transcript
+          interim = t
         }
       }
-
-      const base = textBeforeRef.current
-      const parts = [base, sessionFinal, interim].filter(Boolean)
+      const parts = [textBeforeRef.current, sessionFinal, interim].filter(Boolean)
       setText(parts.join(' '))
     }
 
     recognition.onend = () => {
-      // Commit any interim text — make sure final ref is in the box
-      const base = textBeforeRef.current
-      const parts = [base, finalTranscriptRef.current].filter(Boolean)
+      const parts = [textBeforeRef.current, finalTranscriptRef.current].filter(Boolean)
       setText(parts.join(' '))
       setIsListening(false)
       recognitionRef.current = null
@@ -132,168 +136,174 @@ export default function VoicePlayground() {
     recognition.start()
   }
 
-  function stopListening() {
-    recognitionRef.current?.stop()
-  }
-
   function toggleListening() {
-    if (isListening) stopListening()
+    if (isListening) recognitionRef.current?.stop()
     else startListening()
   }
 
-  // ── Derived display values ─────────────────────────────────
-  const isSpeaking = ttsStatus === 'speaking'
+  // ── Derived values ─────────────────────────────────────────
+  const isSpeaking  = ttsStatus === 'speaking'
+  const isAnyActive = isSpeaking || isListening   // used to disable controls
 
-  const statusLabel =
-    isListening   ? 'Listening' :
-    isSpeaking    ? 'Speaking...' :
-    ttsStatus === 'finished' ? 'Finished' :
-    'Idle'
+  const outputStatusLabel =
+    isSpeaking               ? 'Speaking...' :
+    ttsStatus === 'finished' ? 'Finished'    : 'Idle'
 
-  const statusClass =
-    isListening             ? 'vp-status--listening' :
-    isSpeaking              ? 'vp-status--speaking' :
-    ttsStatus === 'finished' ? 'vp-status--finished' :
-    ''
+  const outputStatusClass =
+    isSpeaking               ? 'vp-status--speaking' :
+    ttsStatus === 'finished' ? 'vp-status--finished'  : ''
 
   return (
-    <div className="vp-panel card">
+    <div className="vp-grid">
 
-      {/* ── Message input ──────────────────────────────────── */}
-      <div className="vp-section">
-        <label className="vp-label">Message</label>
-        <textarea
-          className="vp-textarea"
-          rows={5}
-          placeholder="Type a message for ECHO to speak..."
-          value={text}
-          onChange={e => { setText(e.target.value); setTtsError('') }}
-          disabled={isSpeaking}
-        />
-        {ttsError && <span className="vp-error">{ttsError}</span>}
-      </div>
-
-      {/* ── Speech-to-Text ─────────────────────────────────── */}
-      <div className="vp-stt-section">
-        <span className="vp-section-label">Voice Input</span>
+      {/* ── Card 1: Voice Input ─────────────────────────────── */}
+      <motion.div
+        className="card vp-card"
+        custom={0}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="vp-card-header">
+          <span className="card-label">Voice Input</span>
+          <span className={`card-tag ${isListening ? 'vp-tag--listening' : ''}`}>
+            {isListening
+              ? <span className="vp-listening-badge"><span className="vp-mic-pulse" />Listening</span>
+              : 'Idle'}
+          </span>
+        </div>
 
         {sttSupported ? (
-          <div className="vp-stt-row">
-            <div className="vp-stt-lang">
-              <button
-                className={`vp-stt-lang-btn ${sttLang === 'en-US' ? 'vp-stt-lang-btn--active' : ''}`}
-                onClick={() => setSttLang('en-US')}
-                disabled={isListening}
-                title="English"
-              >
-                EN
-              </button>
-              <button
-                className={`vp-stt-lang-btn ${sttLang === 'nl-NL' ? 'vp-stt-lang-btn--active' : ''}`}
-                onClick={() => setSttLang('nl-NL')}
-                disabled={isListening}
-                title="Dutch"
-              >
-                NL
-              </button>
+          <div className="vp-card-body">
+            <div className="vp-section">
+              <label className="vp-label">Language</label>
+              <div className="vp-stt-lang">
+                <button
+                  className={`vp-stt-lang-btn ${sttLang === 'en-US' ? 'vp-stt-lang-btn--active' : ''}`}
+                  onClick={() => setSttLang('en-US')}
+                  disabled={isListening}
+                >EN</button>
+                <button
+                  className={`vp-stt-lang-btn ${sttLang === 'nl-NL' ? 'vp-stt-lang-btn--active' : ''}`}
+                  onClick={() => setSttLang('nl-NL')}
+                  disabled={isListening}
+                >NL</button>
+              </div>
             </div>
 
             <button
-              className={`vp-mic-btn ${isListening ? 'vp-mic-btn--active' : ''}`}
+              className={`vp-mic-btn vp-mic-btn--full ${isListening ? 'vp-mic-btn--active' : ''}`}
               onClick={toggleListening}
               disabled={isSpeaking}
             >
-              {isListening ? (
-                <>
-                  <span className="vp-mic-pulse" />
-                  Listening...
-                </>
-              ) : (
-                <>🎙 Start Listening</>
-              )}
+              {isListening
+                ? <><span className="vp-mic-pulse" />Stop Listening</>
+                : <>🎙 Start Listening</>}
             </button>
 
             {isListening && (
-              <span className="vp-stt-hint">Click the button again to stop.</span>
+              <p className="vp-stt-hint">Speak clearly — click again to stop.</p>
             )}
           </div>
         ) : (
           <p className="vp-stt-unavailable">
-            Speech recognition is not supported in this browser. Try Chrome or Edge.
+            Speech recognition is not available in this browser. Try Chrome or Edge.
           </p>
         )}
-      </div>
+      </motion.div>
 
-      {/* ── Text-to-Speech controls ────────────────────────── */}
-      <div className="vp-section">
-        <span className="vp-section-label">Voice Output</span>
-      </div>
-
-      <div className="vp-row">
-        <div className="vp-section vp-section--grow">
-          <label className="vp-label">Voice</label>
-          <select
-            className="voice-select vp-select"
-            value={selectedVoice}
-            onChange={e => setSelectedVoice(e.target.value)}
-            disabled={isSpeaking || isListening || !ttsSupported}
-          >
-            {voices.length === 0 && (
-              <option value="">No voices available</option>
-            )}
-            {voices.map(v => (
-              <option key={v.name} value={v.name}>
-                {v.name} ({v.lang})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="vp-section">
-          <label className="vp-label">
-            Speed — <span className="vp-rate-val">{rate.toFixed(1)}x</span>
-          </label>
-          <input
-            type="range"
-            className="vp-slider"
-            min={0.5}
-            max={2.0}
-            step={0.1}
-            value={rate}
-            onChange={e => setRate(parseFloat(e.target.value))}
-            disabled={isSpeaking}
-          />
-          <div className="vp-slider-labels">
-            <span>0.5×</span>
-            <span>2.0×</span>
+      {/* ── Card 2: Voice Output ─────────────────────────────── */}
+      <motion.div
+        className="card vp-card"
+        custom={1}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="vp-card-header">
+          <span className="card-label">Voice Output</span>
+          <div className={`vp-status ${outputStatusClass}`}>
+            <span className="vp-status-dot" />
+            <span className="vp-status-text">{outputStatusLabel}</span>
           </div>
         </div>
-      </div>
 
-      {/* ── Footer ────────────────────────────────────────── */}
-      <div className="vp-footer">
-        <div className={`vp-status ${statusClass}`}>
-          <span className="vp-status-dot" />
-          <span className="vp-status-text">{statusLabel}</span>
+        <div className="vp-card-body">
+          <div className="vp-section">
+            <label className="vp-label">Voice</label>
+            <select
+              className="voice-select"
+              value={selectedVoice}
+              onChange={e => setSelectedVoice(e.target.value)}
+              disabled={isAnyActive || !ttsSupported}
+            >
+              {voices.length === 0 && <option value="">No voices available</option>}
+              {voices.map(v => (
+                <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="vp-section">
+            <label className="vp-label">
+              Speed — <span className="vp-rate-val">{rate.toFixed(1)}x</span>
+            </label>
+            <input
+              type="range"
+              className="vp-slider"
+              min={0.5} max={2.0} step={0.1}
+              value={rate}
+              onChange={e => setRate(parseFloat(e.target.value))}
+              disabled={isAnyActive}
+            />
+            <div className="vp-slider-labels">
+              <span>0.5×</span><span>2.0×</span>
+            </div>
+          </div>
+
+          <div className="vp-section">
+            <label className="vp-label">Message</label>
+            <textarea
+              className="vp-textarea"
+              rows={4}
+              placeholder="Type a message for ECHO to speak..."
+              value={text}
+              onChange={e => { setText(e.target.value); setTtsError('') }}
+              disabled={isSpeaking}
+            />
+            {ttsError && <span className="vp-error">{ttsError}</span>}
+          </div>
+
+          <button
+            className="vp-speak-btn"
+            onClick={speak}
+            disabled={isAnyActive || !ttsSupported}
+          >
+            {isSpeaking
+              ? <><span className="speaking-wave"><span /><span /><span /><span /><span /></span>Speaking...</>
+              : <>◈ Speak</>}
+          </button>
         </div>
+      </motion.div>
 
-        <button
-          className="vp-speak-btn"
-          onClick={speak}
-          disabled={isSpeaking || isListening || !ttsSupported}
-        >
-          {isSpeaking ? (
-            <>
-              <span className="speaking-wave">
-                <span /><span /><span /><span /><span />
-              </span>
-              Speaking...
-            </>
-          ) : (
-            <>◈ Speak</>
-          )}
-        </button>
-      </div>
+      {/* ── Card 3: Storyboard Demo ──────────────────────────── */}
+      <motion.div
+        className="card vp-card vp-storyboard-card"
+        custom={2}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <StoryboardDemo
+          voices={voices}
+          selectedVoice={selectedVoice}
+          rate={rate}
+          isOtherActive={isAnyActive}
+          ttsSupported={ttsSupported}
+          stopRef={sbStopRef}
+        />
+      </motion.div>
+
     </div>
   )
 }

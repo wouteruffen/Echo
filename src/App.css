@@ -1269,7 +1269,7 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-  max-width: 680px;
+  max-width: 900px;
   padding-top: 8px;
 }
 
@@ -1647,4 +1647,315 @@
 .vp-speak-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ── VP grid ────────────────────────────────────────────── */
+.vp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── VP card ────────────────────────────────────────────── */
+.vp-card {
+  border-color: rgba(79, 156, 249, 0.14);
+  box-shadow: 0 0 0 1px rgba(79, 156, 249, 0.04), 0 12px 40px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vp-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.vp-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* ── Listening badge ────────────────────────────────────── */
+.vp-listening-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vp-tag--listening {
+  background: rgba(61, 214, 140, 0.12);
+  border-color: rgba(61, 214, 140, 0.25);
+  color: var(--green);
+}
+
+/* ── Mic button full-width variant ─────────────────────── */
+.vp-mic-btn--full {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 18px;
+}
+
+/* ── Storyboard card ────────────────────────────────────── */
+.vp-storyboard-card {
+  grid-column: 1 / -1;
+  background: rgba(79, 156, 249, 0.02);
+  border-color: rgba(79, 156, 249, 0.18);
+}
+
+.vp-storyboard-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+.vp-storyboard-text {
+  background: rgba(79, 156, 249, 0.04);
+  border-color: rgba(79, 156, 249, 0.1);
+  color: var(--text-dim);
+  cursor: default;
+  resize: none;
+}
+
+/* ── Storyboard scene display ───────────────────────────── */
+.sb-progress-bar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sb-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(79, 156, 249, 0.5);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sb-narration {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.35s ease;
+}
+
+.sb-narration--hidden {
+  opacity: 0;
+}
+
+.sb-scene-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sb-scene-title {
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.sb-scene-counter {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Light mode: progress fill uses light-mode accent */
+[data-theme="light"] .sb-progress-fill {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
+
+[data-theme="light"] .sb-scene-counter {
+  color: var(--accent);
+}
+
+[data-theme="light"] .sb-scene-title {
+  color: var(--text);
+}
+
+/* ── Storyboard voice indicator ─────────────────────────── */
+.sb-voice-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.sb-voice-label--nl {
+  color: var(--text-muted);
+}
+
+.sb-voice-label--fallback {
+  color: var(--amber);
+}
+
+.vp-storyboard-text:focus {
+  border-color: rgba(79, 156, 249, 0.1);
+}
+
+.vp-storyboard-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+/* ── Stop button ────────────────────────────────────────── */
+.vp-stop-btn {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.vp-stop-btn:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--red);
+}
+
+.vp-stop-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Light mode: VP cards ───────────────────────────────── */
+[data-theme="light"] .vp-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(37, 99, 235, 0.13);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05), 0 8px 28px rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .vp-storyboard-card {
+  background: rgba(37, 99, 235, 0.03);
+  border-color: rgba(37, 99, 235, 0.16);
+}
+
+[data-theme="light"] .vp-storyboard-text {
+  background: rgba(37, 99, 235, 0.04);
+  border-color: rgba(37, 99, 235, 0.1);
+  color: var(--text-dim);
+}
+
+[data-theme="light"] .vp-textarea {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.09);
+  color: var(--text);
+}
+
+[data-theme="light"] .vp-textarea:focus {
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+[data-theme="light"] .vp-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme="light"] .vp-stt-lang {
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+[data-theme="light"] .vp-stt-lang-btn:first-child {
+  border-right-color: rgba(0, 0, 0, 0.09);
+}
+
+[data-theme="light"] .vp-stt-lang-btn--active {
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+}
+
+[data-theme="light"] .vp-stt-lang-btn:hover:not(.vp-stt-lang-btn--active):not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .vp-mic-btn {
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+[data-theme="light"] .vp-mic-btn:hover:not(:disabled):not(.vp-mic-btn--active) {
+  background: rgba(5, 150, 105, 0.07);
+  border-color: rgba(5, 150, 105, 0.28);
+}
+
+[data-theme="light"] .voice-select {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.09);
+  color: var(--text-dim);
+}
+
+[data-theme="light"] .voice-select option {
+  background: #fff;
+  color: #0f1117;
+}
+
+[data-theme="light"] .vp-speak-btn {
+  background: rgba(37, 99, 235, 0.09);
+  border-color: rgba(37, 99, 235, 0.27);
+  color: var(--accent);
+}
+
+[data-theme="light"] .vp-speak-btn:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.17);
+  border-color: rgba(37, 99, 235, 0.5);
+  color: var(--text);
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.16);
+}
+
+[data-theme="light"] .vp-stop-btn {
+  border-color: rgba(0, 0, 0, 0.09);
+}
+
+[data-theme="light"] .vp-stop-btn:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.07);
+  border-color: rgba(220, 38, 38, 0.28);
+}
+
+[data-theme="light"] .vp-stt-unavailable {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="light"] .vp-status--listening .vp-status-dot {
+  box-shadow: 0 0 8px var(--green);
+}
+
+[data-theme="light"] .vp-status--speaking .vp-status-dot {
+  box-shadow: 0 0 8px var(--accent);
+}
+
+/* ── VP responsive ──────────────────────────────────────── */
+@media (max-width: 680px) {
+  .vp-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vp-storyboard-card {
+    grid-column: 1;
+  }
 }
