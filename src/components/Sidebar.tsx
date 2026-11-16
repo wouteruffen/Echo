@@ -18,6 +18,7 @@ export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: Sideb
 
   const isHome = location.pathname === '/'
   const isVoicePlayground = location.pathname === '/voice-playground'
+  const isBoard = location.pathname === '/board'
 
   return (
     <motion.nav
@@ -66,6 +67,22 @@ export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: Sideb
           <span className="nav-icon">⬡</span>
           <span className="nav-label">{tr.home}</span>
           {isHome && (
+            <motion.span
+              className="nav-indicator"
+              layoutId="nav-indicator"
+              transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            />
+          )}
+        </button>
+
+        <button
+          className={`nav-item ${isBoard ? 'active' : ''}`}
+          title="Kanban board"
+          onClick={() => navigate('/board')}
+        >
+          <span className="nav-icon">▦</span>
+          <span className="nav-label">Board</span>
+          {isBoard && (
             <motion.span
               className="nav-indicator"
               layoutId="nav-indicator"

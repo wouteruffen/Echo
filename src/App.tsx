@@ -6,6 +6,7 @@ import EchoTerminal from './components/EchoTerminal'
 import HueControl from './components/HueControl'
 import CalendarOverview from './components/CalendarOverview'
 import VoicePlaygroundPage from './pages/VoicePlaygroundPage'
+import KanbanPage from './pages/KanbanPage'
 import { useTheme } from './hooks/useTheme'
 import { useLanguage } from './hooks/useLanguage'
 import './App.css'
@@ -41,6 +42,7 @@ export default function App() {
             </>
           } />
           <Route path="/voice-playground" element={<VoicePlaygroundPage />} />
+          <Route path="/board" element={<KanbanPage />} />
         </Routes>
       </main>
     </div>
