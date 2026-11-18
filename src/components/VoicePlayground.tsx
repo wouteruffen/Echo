@@ -1,22 +1,37 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import StoryboardDemo from './StoryboardDemo'
 
 type TtsStatus = 'idle' | 'speaking' | 'finished'
 type SttLang = 'en-US' | 'nl-NL'
 
+// The Web Speech recognition API is not part of TypeScript's DOM lib, so describe the parts we use.
+interface SpeechRecognition {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onstart: (() => void) | null
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+type SpeechRecognitionCtor = new () => SpeechRecognition
+
 declare global {
   interface Window {
-    webkitSpeechRecognition?: typeof SpeechRecognition
+    SpeechRecognition?: SpeechRecognitionCtor
+    webkitSpeechRecognition?: SpeechRecognitionCtor
   }
 }
 
-function getSpeechRecognitionCtor(): typeof SpeechRecognition | undefined {
+function getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
   if (typeof window === 'undefined') return undefined
   return window.SpeechRecognition ?? window.webkitSpeechRecognition
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 14 },
   visible: (i: number) => ({
     opacity: 1,

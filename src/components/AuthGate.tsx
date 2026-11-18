@@ -33,9 +33,8 @@ export default function AuthGate({ children }: { children: ReactNode }) {
     if (mode === 'signup' && !result.data.session) setMessage('Account aangemaakt. Bevestig eerst de e-mail die Supabase je stuurt.')
   }
 
-  async function signOut() { if (supabase) await supabase.auth.signOut() }
-
-  if (session) return <><div className="echo-auth-bar"><span>Ingelogd als {session.user.email}</span><button className="echo-auth-link" type="button" onClick={signOut}>Uitloggen</button></div>{children}</>
+  // Account details and sign-out live in the account menu (sidebar avatar).
+  if (session) return <>{children}</>
 
   return <section className="echo-auth-card">
     <p className="kanban-eyebrow">Privé workspace</p>

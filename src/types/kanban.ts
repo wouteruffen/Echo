@@ -3,9 +3,13 @@ export type KanbanStatus = typeof KANBAN_STATUSES[number]
 export type KanbanPriority = 'low' | 'medium' | 'high'
 export type ProposalStatus = 'pending' | 'accepted' | 'rejected'
 
+export const LIST_COLORS = ['blue', 'teal', 'green', 'amber', 'orange', 'red', 'pink', 'purple'] as const
+export type ListColor = typeof LIST_COLORS[number]
+
 export interface KanbanList {
   id: string
   title: string
+  color: ListColor | null
   system_status: KanbanStatus | null
   position: number
   created_at: string

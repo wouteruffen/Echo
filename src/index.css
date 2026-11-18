@@ -36,14 +36,14 @@
 
 /* ── Light theme ────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg: #eef1f7;
-  --bg-card: rgba(255, 255, 255, 0.72);
-  --bg-card-hover: rgba(255, 255, 255, 0.92);
-  --border: rgba(0, 0, 0, 0.07);
-  --border-bright: rgba(0, 0, 0, 0.13);
+  --bg: #dde2ea;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f3f5f9;
+  --border: rgba(15, 23, 42, 0.12);
+  --border-bright: rgba(15, 23, 42, 0.2);
   --text: #0f1117;
-  --text-dim: rgba(15, 17, 23, 0.55);
-  --text-muted: rgba(15, 17, 23, 0.32);
+  --text-dim: rgba(15, 17, 23, 0.7);
+  --text-muted: rgba(15, 17, 23, 0.52);
   --accent: #2563eb;
   --accent-glow: rgba(37, 99, 235, 0.1);
   --accent-dim: rgba(37, 99, 235, 0.65);
@@ -206,3 +206,16 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+/* ── Opaque surface for menus & overlays ───────────────── */
+:root { --surface-solid: #131821; }
+[data-theme="light"] { --surface-solid: #ffffff; }
+
+/* ── Background presets (Settings → Display settings) ─────
+   Each preset has a dark- and light-theme variant so text stays readable. */
+html[data-bg="midnight"] { --bg: #0b1430; --surface-solid: #141f40; }
+html[data-bg="soft"] { --bg: #1a1916; --surface-solid: #25231f; }
+html[data-bg="forest"] { --bg: #0b1a13; --surface-solid: #13261c; }
+html[data-theme="light"][data-bg="midnight"] { --bg: #e3e9f7; --surface-solid: #ffffff; }
+html[data-theme="light"][data-bg="soft"] { --bg: #f4f1ea; --surface-solid: #fffdf8; }
+html[data-theme="light"][data-bg="forest"] { --bg: #e4efe8; --surface-solid: #ffffff; }

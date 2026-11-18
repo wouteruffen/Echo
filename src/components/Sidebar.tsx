@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
+import type { Session } from '@supabase/supabase-js'
 import type { Theme } from '../hooks/useTheme'
+import AccountMenu from './AccountMenu'
 import { translations, type Lang } from '../i18n/translations'
 
 interface SidebarProps {
@@ -8,9 +10,11 @@ interface SidebarProps {
   onToggleTheme: () => void
   lang: Lang
   onSetLang: (l: Lang) => void
+  onOpenSettings: () => void
+  session: Session | null
 }
 
-export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: SidebarProps) {
+export default function Sidebar({ theme, onToggleTheme, lang, onSetLang, onOpenSettings, session }: SidebarProps) {
   const isDark = theme === 'dark'
   const tr = translations[lang]
   const navigate = useNavigate()
@@ -28,8 +32,9 @@ export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: Sideb
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <div className="sidebar-logo">
-        <span className="logo-mark">◈</span>
-        <span className="logo-text">ECHO</span>
+        {session
+          ? <AccountMenu session={session} />
+          : <><span className="logo-mark">◈</span><span className="logo-text">ECHO</span></>}
       </div>
 
       <div className="lang-switcher">
@@ -107,6 +112,10 @@ export default function Sidebar({ theme, onToggleTheme, lang, onSetLang }: Sideb
           )}
         </button>
       </div>
+
+      <button className="sidebar-settings" type="button" aria-label="Instellingen openen" title="Instellingen" onClick={onOpenSettings}>
+        <span aria-hidden="true">⚙</span>
+      </button>
 
       <div className="sidebar-echo-status">
         <span className="echo-status-dot" />
