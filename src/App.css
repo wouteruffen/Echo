@@ -2243,3 +2243,8 @@
 .trello-list-menu { position: absolute; z-index: 5; top: 26px; right: 0; display: grid; width: 164px; padding: 5px; background: var(--bg-card); border: 1px solid var(--border-bright); border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,.28); }
 .trello-list-menu button { padding: 8px 9px; text-align: left; color: var(--text-dim); background: transparent; border: 0; border-radius: 5px; font: inherit; font-size: 12px; cursor: pointer; }
 .trello-list-menu button:hover { color: var(--text); background: rgba(79,156,249,.1); }
+
+.trello-card { position: relative; }
+.trello-card-edit { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 27px; height: 27px; padding: 0; opacity: 0; color: var(--text-dim); background: color-mix(in srgb, var(--bg-deep) 86%, var(--text) 8%); border: 1px solid var(--border); border-radius: 6px; font: inherit; font-size: 16px; line-height: 1; cursor: pointer; transform: translateY(2px); transition: opacity .15s ease, transform .15s ease, color .15s ease, border-color .15s ease; }
+.trello-card:hover .trello-card-edit, .trello-card:focus-within .trello-card-edit { opacity: 1; transform: translateY(0); }
+.trello-card-edit:hover { color: var(--text); border-color: var(--accent); background: var(--accent-glow); }

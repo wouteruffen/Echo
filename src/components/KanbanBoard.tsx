@@ -97,11 +97,12 @@ export default function KanbanBoard() {
       {lists.map((list) => <article className="trello-list" key={list.id}>
         <header className="trello-list-header"><h2>{list.title}</h2><div className="trello-list-actions"><span>{cardsFor(list).length}</span><button className="trello-menu-trigger" type="button" aria-label={`Acties voor ${list.title}`} onClick={() => setMenuList(menuList === list.id ? null : list.id)}>•••</button>{menuList === list.id && <div className="trello-list-menu"><button type="button" onClick={() => { setCardList(list); setMenuList(null) }}>Kaart toevoegen</button><button type="button" onClick={() => { editList(list); setMenuList(null) }}>Lijst hernoemen</button><button type="button" onClick={() => { removeList(list); setMenuList(null) }}>Lijst verwijderen</button></div>}</div></header>
         <div className="trello-cards">
-          {cardsFor(list).map((card) => <button className="trello-card" type="button" key={card.id} onClick={() => openEditor(card)}>
+          {cardsFor(list).map((card) => <article className="trello-card" key={card.id} role="button" tabIndex={0} onClick={() => openEditor(card)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') openEditor(card) }}>
+            <button className="trello-card-edit" type="button" aria-label={`Kaart ${card.title} bewerken`} title="Kaart bewerken" onClick={(event) => { event.stopPropagation(); openEditor(card) }}>✎</button>
             <strong>{card.title}</strong>
             {card.description && <p>{card.description}</p>}
             <footer><span className={`kanban-priority kanban-priority--${card.priority}`}>{priorityLabels[card.priority]}</span>{readDate(card.due_at) && <span className="kanban-due-date">◷ {readDate(card.due_at)}</span>}</footer>
-          </button>)}
+          </article>)}
         </div>
         {cardList?.id === list.id ? <form className="trello-add-card-form" onSubmit={addCard}><input autoFocus value={newTitle} onChange={(event) => setNewTitle(event.target.value)} placeholder="Titel van deze kaart" /><div><button type="submit" className="kanban-add-button" disabled={saving}>Toevoegen</button><button type="button" className="trello-text-button" onClick={() => setCardList(null)}>Annuleren</button></div></form> : <button className="trello-add-card" type="button" onClick={() => setCardList(list)}>＋ Kaart toevoegen</button>}
       </article>)}
