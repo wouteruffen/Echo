@@ -21,8 +21,10 @@ export async function listLists(): Promise<KanbanList[]> {
   if (error) throw error
   if (data.length) return data as KanbanList[]
 
-  const { data: created, error: createError } = await api.from('kanban_lists').insert(defaultLists).select('id, title, system_status, position, created_at').order('position')
+  const { error: createError } = await api.from('kanban_lists').upsert(defaultLists, { onConflict: 'user_id,system_status', ignoreDuplicates: true })
   if (createError) throw createError
+  const { data: created, error: reloadError } = await api.from('kanban_lists').select('id, title, system_status, position, created_at').order('position')
+  if (reloadError) throw reloadError
   return created as KanbanList[]
 }
 
@@ -60,4 +62,17 @@ export async function updateCardDetails(id: string, details: { title: string; de
   const { data, error } = await client().from('kanban_cards').update({ title, description: details.description, priority: details.priority, due_at: details.dueAt, list_id: details.list.id, status: details.list.system_status ?? 'inbox' }).eq('id', id).select(cardFields).single()
   if (error) throw error
   return data as KanbanCard
+}
+
+export async function renameList(id: string, title: string): Promise<KanbanList> {
+  const cleanTitle = title.trim()
+  if (!cleanTitle) throw new Error('Een lijst heeft een naam nodig.')
+  const { data, error } = await client().from('kanban_lists').update({ title: cleanTitle }).eq('id', id).select('id, title, system_status, position, created_at').single()
+  if (error) throw error
+  return data as KanbanList
+}
+
+export async function deleteList(id: string): Promise<void> {
+  const { error } = await client().from('kanban_lists').delete().eq('id', id)
+  if (error) throw error
 }

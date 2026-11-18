@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { isSupabaseConfigured } from '../lib/supabase'
-import { createCard, createList, listCards, listLists, updateCardDetails } from '../services/kanbanService'
+import { createCard, createList, deleteList, listCards, listLists, renameList, updateCardDetails } from '../services/kanbanService'
 import { type KanbanCard, type KanbanList, type KanbanPriority } from '../types/kanban'
 
 const priorityLabels: Record<KanbanPriority, string> = { high: 'Hoog', medium: 'Normaal', low: 'Laag' }
@@ -12,6 +12,7 @@ export default function KanbanBoard() {
   const [cards, setCards] = useState<KanbanCard[]>([])
   const [newList, setNewList] = useState('')
   const [addingList, setAddingList] = useState(false)
+  const [menuList, setMenuList] = useState<string | null>(null)
   const [cardList, setCardList] = useState<KanbanList | null>(null)
   const [newTitle, setNewTitle] = useState('')
   const [editing, setEditing] = useState<KanbanCard | null>(null)
@@ -47,6 +48,25 @@ export default function KanbanBoard() {
     finally { setSaving(false) }
   }
 
+  async function editList(list: KanbanList) {
+    const name = window.prompt('Nieuwe naam voor deze lijst', list.title)
+    if (!name?.trim()) return
+    try {
+      const updated = await renameList(list.id, name)
+      setLists((all) => all.map((item) => item.id === updated.id ? updated : item))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'De lijst kon niet worden gewijzigd.') }
+  }
+
+  async function removeList(list: KanbanList) {
+    const listCards = cardsFor(list)
+    if (listCards.length) { setError('Verplaats of verwijder eerst de kaarten uit deze lijst.'); return }
+    if (!window.confirm(`Lijst "${list.title}" verwijderen?`)) return
+    try {
+      await deleteList(list.id)
+      setLists((all) => all.filter((item) => item.id !== list.id))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'De lijst kon niet worden verwijderd.') }
+  }
+
   async function addCard(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!newTitle.trim() || !cardList) return
@@ -75,7 +95,7 @@ export default function KanbanBoard() {
     {error && <p className="kanban-state kanban-state--error">{error}</p>}
     <div className="trello-lists" aria-label="Kanbanbord">
       {lists.map((list) => <article className="trello-list" key={list.id}>
-        <header className="trello-list-header"><h2>{list.title}</h2><span>{cardsFor(list).length}</span></header>
+        <header className="trello-list-header"><h2>{list.title}</h2><div className="trello-list-actions"><span>{cardsFor(list).length}</span><button className="trello-menu-trigger" type="button" aria-label={`Acties voor ${list.title}`} onClick={() => setMenuList(menuList === list.id ? null : list.id)}>•••</button>{menuList === list.id && <div className="trello-list-menu"><button type="button" onClick={() => { setCardList(list); setMenuList(null) }}>Kaart toevoegen</button><button type="button" onClick={() => { editList(list); setMenuList(null) }}>Lijst hernoemen</button><button type="button" onClick={() => { removeList(list); setMenuList(null) }}>Lijst verwijderen</button></div>}</div></header>
         <div className="trello-cards">
           {cardsFor(list).map((card) => <button className="trello-card" type="button" key={card.id} onClick={() => openEditor(card)}>
             <strong>{card.title}</strong>
