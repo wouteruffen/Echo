@@ -4,6 +4,7 @@ import { createCard, createList, deleteCard, deleteList, listCards, listLists, m
 import { LIST_COLORS, type KanbanCard, type KanbanList, type KanbanPriority, type ListColor } from '../types/kanban'
 import ListMenu from './ListMenu'
 import ConfirmDialog from './ConfirmDialog'
+import CardEchoPanel from './CardEchoPanel'
 
 const priorityLabels: Record<KanbanPriority, string> = { high: 'Hoog', medium: 'Normaal', low: 'Laag' }
 const readDate = (value: string | null) => value ? new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short' }).format(new Date(value)) : null
@@ -429,6 +430,12 @@ export default function KanbanBoard() {
             <h3><span aria-hidden="true">☰</span> <label htmlFor="card-description">Omschrijving</label></h3>
             <textarea id="card-description" className="card-description" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Voeg een uitgebreidere omschrijving toe…" rows={7} />
           </section>
+
+          <CardEchoPanel key={editing.id} card={editing} onCardUpdated={(updated) => {
+            // Reflect a user-approved ECHO suggestion in the board and in the open form.
+            setCards((all) => all.map((item) => item.id === updated.id ? updated : item))
+            setEditing(updated); setPriority(updated.priority); setDueDate(dateValue(updated.due_at))
+          }} />
 
           {modalError && <p className="kanban-state kanban-state--error" role="alert">{modalError}</p>}
           <footer className="card-modal-actions">
