@@ -2211,3 +2211,28 @@
 .kanban-editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .kanban-editor-actions { display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin-top: 4px; }
 .kanban-editor-actions .kanban-add-button { padding: 10px 14px; }
+
+/* Trello-inspired board surface */
+.trello-board { min-width: 0; }
+.trello-lists { display: flex; align-items: flex-start; gap: 14px; overflow-x: auto; padding: 2px 2px 18px; min-height: 460px; }
+.trello-list { flex: 0 0 292px; display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 270px); padding: 11px; border: 1px solid color-mix(in srgb, var(--border) 80%, var(--accent)); border-radius: 12px; background: color-mix(in srgb, var(--bg-deep) 88%, var(--text) 5%); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); overflow-y: auto; }
+.trello-list-header { display: flex; justify-content: space-between; align-items: center; padding: 2px 3px 7px; }
+.trello-list-header h2 { margin: 0; color: var(--text); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.trello-list-header span { color: var(--text-muted); font-size: 11px; }
+.trello-cards { display: grid; gap: 8px; }
+.trello-card { display: grid; gap: 8px; width: 100%; padding: 13px; text-align: left; color: var(--text); background: var(--bg-card); border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 2px 4px rgba(0,0,0,.13); cursor: pointer; transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+.trello-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 52%, var(--border)); background: color-mix(in srgb, var(--bg-card) 94%, var(--accent) 6%); box-shadow: 0 8px 18px rgba(0,0,0,.2), 0 0 0 1px rgba(79,156,249,.09); }
+.trello-card strong { font-size: 13px; font-weight: 550; line-height: 1.4; }
+.trello-card p { margin: 0; overflow: hidden; color: var(--text-muted); font-size: 12px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.trello-card footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.trello-add-card, .trello-add-list > button { width: 100%; padding: 9px; text-align: left; color: var(--text-dim); background: transparent; border: 1px dashed transparent; border-radius: 8px; font: inherit; font-size: 12px; cursor: pointer; }
+.trello-add-card:hover, .trello-add-list > button:hover { color: var(--text); background: rgba(79,156,249,.08); border-color: rgba(79,156,249,.28); }
+.trello-add-card-form, .trello-add-list form { display: grid; gap: 9px; padding-top: 2px; }
+.trello-add-card-form input, .trello-add-list input { width: 100%; padding: 9px 10px; color: var(--text); background: var(--bg-card); border: 1px solid var(--accent); border-radius: 7px; font: inherit; font-size: 12px; outline: none; }
+.trello-add-card-form div, .trello-add-list form div { display: flex; align-items: center; gap: 10px; }
+.trello-add-card-form .kanban-add-button, .trello-add-list .kanban-add-button { padding: 8px 10px; }
+.trello-text-button { padding: 5px 0; color: var(--text-muted); background: transparent; border: 0; font: inherit; font-size: 12px; cursor: pointer; }
+.trello-text-button:hover { color: var(--text); }
+.trello-add-list { flex: 0 0 250px; padding: 4px; border-radius: 10px; background: rgba(255,255,255,.04); }
+.trello-add-list form { padding: 10px; background: color-mix(in srgb, var(--bg-deep) 90%, var(--text) 5%); border: 1px solid var(--border); border-radius: 10px; }
+@media (max-width:680px) { .trello-list { flex-basis: 276px; } }
